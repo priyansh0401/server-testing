@@ -13,10 +13,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-key-for-development-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = os.getenv('DEBUG', 'True') == 'True'
-DEBUG = True
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-ALLOWED_HOSTS = ['.vercel.app']
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+ALLOWED_HOSTS = ['*']  # Allow all hosts for Vercel deployment
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'https://*.now.sh',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,6 +46,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add whitenoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -71,25 +78,27 @@ WSGI_APPLICATION = 'guardian_eye.wsgi.application'
 ASGI_APPLICATION = 'guardian_eye.asgi.application'
 
 # Database
+# Use Neon PostgreSQL database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'guardian_eye'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'db'),
-        'PORT': os.getenv('DB_PORT', '5432'),
+        'NAME': os.getenv('POSTGRES_DATABASE', 'neon-guardianeye'),
+        'USER': os.getenv('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('POSTGRES_HOST', ''),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
 
 # Channel layers for WebSockets
+# For Vercel deployment, we'll use in-memory channel layer
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [(os.getenv('REDIS_HOST', 'redis'), int(os.getenv('REDIS_PORT', '6379')))],
-        },
-    },
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
 
 # Password validation
@@ -117,6 +126,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -162,5 +172,9 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = DEBUG
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'https://guardian-eye.vercel.app',
+]
+CORS_ALLOW_CREDENTIALS = True
