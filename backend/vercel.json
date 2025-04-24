@@ -1,11 +1,11 @@
 {
     "builds":[{
-        "src":"guardian_eye/asgi.py",
+        "src":"guardian_eye/wsgi.py",
         "use":"@vercel/python",
         "config":{"maxLambdaSize":"15mb","runtime":"python3.11.3"}
     }],
     "routes":[{
         "src":"/(.*)",
-        "dest":"guardian_eye/asgi.py"
+        "dest":"guardian_eye/wsgi.py"
     }]
 }
