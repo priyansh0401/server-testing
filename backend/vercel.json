@@ -2,10 +2,27 @@
     "builds":[{
         "src":"guardian_eye/wsgi.py",
         "use":"@vercel/python",
-        "config":{"maxLambdaSize":"15mb","runtime":"python3.11.3"}
+        "config":{"maxLambdaSize":"15mb","runtime":"python3.9"}
     }],
-    "routes":[{
-        "src":"/(.*)",
-        "dest":"guardian_eye/wsgi.py"
-    }]
+    "routes":[
+        {
+            "src": "/api/(.*)",
+            "dest": "guardian_eye/wsgi.py"
+          },
+          {
+            "src": "/admin/(.*)",
+            "dest": "guardian_eye/wsgi.py"
+          },
+          {
+            "src": "/media/(.*)",
+            "dest": "guardian_eye/wsgi.py"
+          },
+          {
+            "src": "/static/(.*)",
+            "dest": "guardian_eye/wsgi.py"
+          }
+    ],
+    "env": {
+    "DJANGO_SETTINGS_MODULE": "guardian_eye.settings"
+  }
 }
